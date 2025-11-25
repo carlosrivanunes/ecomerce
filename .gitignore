@@ -1,0 +1,47 @@
+# Laravel
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+/.idea
+/.vscode
+/.phpunit.result.cache
+
+# Environment file
+.env
+.env.backup
+.env.local
+.env.*.local
+
+# Composer
+composer.lock
+
+# NPM
+package-lock.json
+yarn.lock
+
+# Laravel Mix / Vite build
+/public/build
+/public/hot
+/public/mix-manifest.json
+/public/css/app.css
+/public/js/app.js
+
+# Logs and cache
+/storage/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# PHPUnit
+.phpunit.result.cache
+
+# Ignore IDE configs
+*.idea/
+*.vscode/
