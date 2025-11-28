@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // <<< Adicionado para lidar com ficheiros
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -93,30 +93,25 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product) // Usando Route Model Binding
     {
-        $validatedData = $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        // Lógica para lidar com a atualização da imagem
         if ($request->hasFile('image')) {
-            // 1. Remove a imagem antiga se existir
+            // apaga imagem antiga se existir
             if ($product->image && Storage::disk('public')->exists($product->image)) {
                 Storage::disk('public')->delete($product->image);
             }
-            // 2. Guarda a nova imagem
-            $validatedData['image'] = $request->file('image')->store('product_images', 'public');
+            // salva nova imagem em storage/app/public/product_images
+            $data['image'] = $request->file('image')->store('product_images', 'public');
         }
-        // Se nenhuma nova imagem foi enviada, o campo 'image' não entra em $validatedData
-        // e o valor antigo no banco de dados será mantido.
 
-        // Atualiza o produto com os dados validados (incluindo a nova imagem, se houver)
-        $product->update($validatedData);
+        $product->update($data);
 
-        // Redireciona de volta para a lista com mensagem de sucesso
-        return redirect()->route('products.index')->with('success', 'Produto atualizado com sucesso!');
+        return redirect()->route('products.index')->with('success', 'Produto atualizado com sucesso.');
     }
 
     /**

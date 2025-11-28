@@ -1,133 +1,172 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    /* Variáveis de Estilo da Página Inicial (Padronização) */
+    :root {
+        --primary-color: #5d5d81; /* Índigo Suave */
+        --accent-color: #00897b; /* Verde-Água (Teal) para Ação */
+        --light-bg: #f4f7f9;
+        --border-color: #e0e0e0;
+    }
 
-<div class="container py-5">
-    {{-- Título e botão Continuar Comprando --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0"><i class="bi bi-cart3 me-2"></i>Meu Carrinho</h1>
-        <a href="{{ route('products.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Continuar Comprando
-        </a>
-    </div>
+    /* Estilos Gerais do Carrinho */
+    .cart-container {
+        padding: 50px 0;
+        background-color: var(--light-bg);
+        min-height: 80vh; /* Para garantir que o fundo claro cubra a página */
+    }
 
-    {{-- *** PARTE QUE FALTAVA: Exibir Mensagens de Erro *** --}}
-    @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
-    {{-- *** FIM DA PARTE QUE FALTAVA *** --}}
+    .cart-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 10px;
+    }
 
-    {{-- Mensagens de sucesso --}}
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
+    /* Tabela do Carrinho */
+    .table-cart {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .table-cart thead th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        border-bottom: none;
+        vertical-align: middle;
+    }
 
-    @if(Cart::getContent()->count() > 0)
-    <div class="row">
-        {{-- Coluna da Lista de Itens --}}
-        <div class="col-lg-8">
-            @foreach(Cart::getContent() as $item)
-            <div class="card mb-3 shadow-sm border-0">
-                <div class="row g-0">
+    .table-cart tbody tr:hover {
+        background-color: #f9f9f9;
+    }
 
-                    {{-- Exibição da Imagem --}}
-                    <div class="col-md-2 d-flex align-items-center justify-content-center p-2">
-                        @php
-                            $imageUrl = isset($item->attributes['image']) && $item->attributes['image']
-                            ? asset('storage/' . $item->attributes['image'])
-                            : 'https://via.placeholder.com/100?text=Sem+Img';
-                        @endphp
-                        <img src="{{ $imageUrl }}"
-                            class="img-fluid rounded"
-                            alt="{{ $item->name }}"
-                            style="max-height: 100px; max-width: 100px; object-fit: contain;">
-                    </div>
+    .table-cart td {
+        vertical-align: middle;
+        font-size: 1rem;
+        border-color: #f0f0f0;
+    }
 
-                    {{-- Coluna dos Detalhes --}}
-                    <div class="col-md-10">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <h5 class="card-title">{{ $item->name }}</h5>
-                                <span class="h5 fw-bold text-success">
-                                    R$ {{ number_format($item->price * $item->quantity, 2, ',', '.') }}
-                                </span>
-                            </div>
-                            <p class="card-text text-muted mb-2">
-                                Preço Unitário: R$ {{ number_format($item->price, 2, ',', '.') }}
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                {{-- Form Atualizar --}}
-                                <form action="{{ route('cart.update', $item->id) }}" method="POST" class="d-flex">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" class="form-control form-control-sm" style="width: 70px;">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm ms-2" title="Atualizar Quantidade"><i class="bi bi-arrow-repeat"></i></button>
-                                </form>
-                                {{-- Form Remover --}}
-                                <form action="{{ route('cart.remove', $item->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Remover Item"><i class="bi bi-trash-fill"></i> Remover</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endforeach
+    /* Total e Checkout */
+    .checkout-summary {
+        margin-top: 30px;
+        padding: 20px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .checkout-total-text {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .checkout-total-value {
+        color: var(--accent-color);
+    }
+
+    .btn-checkout {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        font-weight: 600;
+        padding: 10px 30px;
+        font-size: 1.1rem;
+    }
+
+    .btn-checkout:hover {
+        background-color: #00695c;
+        border-color: #00695c;
+    }
+    
+    .btn-remove-item {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+    
+    .btn-remove-item:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+</style>
+
+<div class="container cart-container">
+    <h1 class="cart-title">🛒 Seu Carrinho de Compras</h1>
+
+    @if($cartItems->isEmpty())
+        <div class="text-center py-5">
+            <i class="bi bi-cart-x" style="font-size: 3rem; color: #aeb6bf;"></i>
+            <p class="text-muted mt-3 h4">Seu carrinho está vazio.</p>
+            <a href="{{ route('products.index') }}" class="btn btn-secondary mt-3">Continuar Comprando</a>
         </div>
-
-        {{-- Coluna do Resumo do Pedido --}}
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 sticky-top" style="top: 2rem;">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">Resumo do Pedido</h4>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span>Subtotal ({{ Cart::getTotalQuantity() }} itens)</span>
-                            <span>R$ {{ number_format(Cart::getSubTotal(), 2, ',', '.') }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span>Frete</span>
-                            <span class="text-success">Grátis</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 fw-bold h5">
-                            <span>Total</span>
-                            <span>R$ {{ number_format(Cart::getTotal(), 2, ',', '.') }}</span>
-                        </li>
-                    </ul>
-                    <div class="d-grid gap-2 mt-4">
-                        <a href="{{ route('checkout.index') }}" class="btn btn-success">
-                            Finalizar Compra
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     @else
-    {{-- Mensagem de Carrinho Vazio --}}
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm text-center py-5">
-                <div class="card-body">
-                    <i class="bi bi-cart-x" style="font-size: 4rem; color: var(--bs-gray-500);"></i>
-                    <h3 class="mt-4">Seu carrinho está vazio.</h3>
-                    <p class="text-muted">Parece que você ainda não adicionou nenhum produto.</p>
-                    <a href="{{ route('products.index') }}" class="btn btn-primary mt-3">
-                        <i class="bi bi-shop me-1"></i> Ir para Produtos
+        <div class="row">
+            <div class="col-lg-8">
+                <table class="table table-striped table-cart">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 40%;">Produto</th>
+                            <th scope="col" style="width: 15%;">Preço</th>
+                            <th scope="col" style="width: 15%;">Quantidade</th>
+                            <th scope="col" style="width: 15%;">Total</th>
+                            <th scope="col" style="width: 15%;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($cartItems as $item)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {{-- <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px; border-radius: 4px;"> --}}
+                                        <span style="font-weight: 500; color: #333;">{{ $item->product->name }}</span>
+                                    </div>
+                                </td>
+                                <td>R$ {{ number_format($item->product->price, 2, ',', '.') }}</td>
+                                <td>
+                                    {{ $item->quantity }}
+                                </td>
+                                <td style="font-weight: 600;">R$ {{ number_format($item->product->price * $item->quantity, 2, ',', '.') }}</td>
+                                <td>
+                                    <form action="{{ route('cart.remove', $item->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm btn-remove-item">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="checkout-summary">
+                    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: var(--primary-color);">Resumo do Pedido</h4>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Subtotal:</span>
+                        <span style="font-weight: 500;">R$ {{ number_format($subtotal, 2, ',', '.') }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-4 checkout-total-text">
+                        <span>Total:</span>
+                        <span class="checkout-total-value">R$ {{ number_format($subtotal, 2, ',', '.') }}</span>
+                    </div>
+                    
+                    <a href="{{ route('checkout.index') }}" class="btn btn-checkout w-100">
+                        <i class="bi bi-check-circle-fill"></i> Finalizar Compra
                     </a>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 </div>
 @endsection

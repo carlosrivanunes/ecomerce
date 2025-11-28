@@ -24,10 +24,19 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Faz o login (Laravel Breeze / Fortify)
         $request->authenticate();
 
+        // Regenera a sessão para segurança
         $request->session()->regenerate();
 
+        // Redireciona dependendo do tipo de usuário
+        if (Auth::user()->is_admin) {
+            // Redireciona para dashboard do admin
+            return redirect()->intended('/dashboard');
+        }
+
+        // Redireciona para página normal para clientes
         return redirect()->intended(route('home', absolute: false));
     }
 
@@ -39,9 +48,9 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        //return redirect('/');
+        return redirect()->intended(route('home', absolute: false));
     }
 }

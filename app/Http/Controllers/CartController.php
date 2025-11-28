@@ -18,9 +18,14 @@ class CartController extends Controller
     public function index()
     {
         // Use Cart::getContent() para darryldecode/cart
+
+        $stripeKey = config('services.stripe.key'); // Chave pública para JS
+        $stripeSecret = config('services.stripe.secret'); // Chave secreta para API
+
+
         $cartItems = Cart::getContent(); 
         // Renomeie a view se necessário (ex: 'cart.index')
-        return view('cart.cart', compact('cartItems')); 
+        return view('cart.cart', compact('cartItems', 'stripeKey', 'stripeSecret')); 
     }
 
     /**

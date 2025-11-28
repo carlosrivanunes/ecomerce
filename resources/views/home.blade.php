@@ -1,130 +1,215 @@
 @extends('layouts.app')
 
 @section('content')
-
-{{-- 
-  *** ADICIONADO: CSS dos Cards ***
-  Copiado de 'products/index.blade.php' para manter o estilo.
---}}
 <style>
-    .card-img-top.fixed-img {
-        height: 220px;
-        object-fit: cover;
-        width: 100%;
+    /* 1. Estilos Base e Cores - Elegante e Profundo */
+    :root {
+        --primary-color: #5d5d81; /* Índigo Suave */
+        --accent-color: #00897b; /* Verde-Água (Teal) para Ação */
+        --dark-bg: #1f2833; /* Azul Escuro Quase Preto */
+        --light-bg: #f4f7f9; /* Fundo Muito Claro */
+        --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra Leve */
     }
-    .card-hover {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+    /* 2. Hero Section */
+    .hero-section {
+        /* Mantendo o gradiente forte para a seção principal */
+        background: linear-gradient(135deg, #4a148c 0%, #283593 100%); 
+        color: white;
+        padding: 120px 20px;
+        text-align: center;
     }
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+
+    .hero-title {
+        font-size: 3.8rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+        letter-spacing: -1px;
     }
-    .text-truncate-lines {
-        display: -webkit-box;
-        -webkit-line-clamp: 2; /* Número de linhas */
-        -webkit-box-orient: vertical;
+
+    .hero-btn {
+        padding: 15px 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        background-color: white !important;
+        border-color: white !important;
+        color: #4a148c !important;
+        transition: all 0.3s;
+        border-radius: 8px;
+    }
+
+    .hero-btn:hover {
+        background-color: #f0f0f0 !important;
+        transform: translateY(-2px);
+    }
+
+    /* 3. Products Section */
+    .products-section {
+        padding: 80px 20px;
+        background: var(--light-bg);
+    }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 60px;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    /* 4. Product Card (Clean Look) */
+    .product-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
         overflow: hidden;
-        text-overflow: ellipsis;
-        min-height: 40px; 
+        box-shadow: none;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     }
-    .card-title-link {
-        text-decoration: none;
+
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-shadow);
+    }
+
+    .card-image-wrapper {
+        height: 240px;
+        overflow: hidden;
+        background: #fcfcfc;
+    }
+    
+    .card-img-top {
+        transition: transform 0.5s;
+        width: 100%; /* Garantir que a imagem cubra o wrapper */
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-card:hover .card-img-top {
+        transform: scale(1.03);
+    }
+
+    .card-body .card-title {
+        color: #333;
+        font-weight: 600;
+        font-size: 1.15rem;
+        margin-bottom: 8px;
+    }
+    
+    /* Link para o título */
+    .card-title a {
         color: inherit;
+        text-decoration: none;
+        transition: color 0.2s;
     }
-    .card-title-link:hover {
-        color: var(--bs-primary);
+    .card-title a:hover {
+        color: var(--accent-color);
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 15px; 
+        display: block; 
+        width: 100%;
+        text-align: left; 
+    }
+    
+    /* 5. Botão de Ação do Card (Ver Detalhes) */
+    .btn-view-details {
+        background-color: var(--accent-color) !important; /* Verde-Água */
+        border-color: var(--accent-color) !important;
+        border-radius: 4px;
+        padding: 8px 15px;
+        font-weight: 600;
+        width: 100%; /* Ocupa a largura total da div, para ficar abaixo do preço */
+    }
+    
+    .btn-view-details:hover {
+        background-color: #00695c !important;
+        border-color: #00695c !important;
+    }
+    
+    /* 6. Footer */
+    .app-footer {
+        background: var(--dark-bg);
+        color: #aeb6bf;
+        padding: 40px 20px;
+        text-align: center;
+        margin-top: 60px;
+        font-size: 0.9rem;
     }
 </style>
 
-{{-- 
-  Seção "Hero" principal (Seu código original)
---}}
-<div class="container col-xxl-8 px-4 py-5">
-    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
-        
-        {{-- Coluna da Imagem --}}
-        <div class="col-10 col-sm-8 col-lg-6">
-            <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1470&q=80" 
-                 class="d-block mx-lg-auto img-fluid rounded-3 shadow-lg" 
-                 alt="Rack com roupas estilosas penduradas" 
-                 width="700" height="500" loading="lazy">
-        </div>
-        
-        {{-- Coluna do Texto e Botão --}}
-        <div class="col-lg-6">
-            <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-4">Seu Novo Estilo Começa Aqui</h1>
-            
-            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                <a href="{{ route('products.index') }}" class="btn btn-primary btn-lg px-4 me-md-2 fw-bold">
-                    Ver Coleção Completa
-                </a>
-            </div>
-        </div>
+
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">ShopHub: Qualidade, Preço e Elegância.</h1>
+        <p style="font-size: 1.25rem; margin-bottom: 50px; font-weight: 300;">Selecione os melhores produtos com a curadoria que você merece.</p>
+        <a href="{{ route('products.index') }}" class="btn hero-btn btn-lg">
+            <i class="bi bi-tag-fill"></i> Ver Todos os Produtos
+        </a>
     </div>
-</div>
+</section>
 
-{{-- 
-  *** NOVA SEÇÃO: Produtos em Destaque ***
---}}
-<div class="bg-light py-5">
-    <div class="container py-4" style="max-width: 1200px;">
-        <h2 class="text-center fw-bold mb-4">Nossos Destaques</h2>
+---
+
+<section class="products-section">
+    <div class="container">
+        <h2 class="section-title">✨ Nossas Escolhas da Semana</h2>
         
-        {{-- Verifica se a variável $products existe e não está vazia --}}
-        @if(isset($products) && $products->count() > 0)
-            
-            {{-- 
-              Usamos 'row-cols-lg-3' para 3 colunas em telas grandes,
-              exatamente como em 'products/index.blade.php'
-            --}}
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                
-                {{-- Loop para cada produto --}}
-                @foreach($products as $product)
-                    <div class="col">
-                        {{-- 
-                          Card de produto (HTML simplificado de products/index.blade.php)
-                          Removemos os botões "Add" e "Delete" para um visual mais limpo na home.
-                        --}}
-                        <div class="card h-100 border-0 shadow-sm card-hover">
-                            
-                            {{-- Link na imagem e no título para a página do produto --}}
-                            <a href="{{ route('products.show', $product->id) }}">
-                                @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}" class="card-img-top fixed-img" alt="{{ $product->name }}">
-                                @else
-                                    <img src="https://via.placeholder.com/300x200?text=Sem+Imagem" class="card-img-top fixed-img" alt="Sem imagem">
-                                @endif
-                            </a>
-
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">
-                                    <a href="{{ route('products.show', $product->id) }}" class="card-title-link">
-                                        {{ $product->name }}
-                                    </a>
-                                </h5>
-                                
-                                <p class="card-text text-muted small text-truncate-lines">
-                                    {{ $product->description }}
-                                </p>
-
-                                {{-- Preço (mt-auto empurra para baixo) --}}
-                                <div class="mt-auto">
-                                    <span class="h5 mb-0 fw-bold text-success">
-                                        R$ {{ number_format($product->price, 2, ',', '.') }}
-                                    </span>
+        <div class="row g-4">
+            @forelse($products as $product)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 product-card">
+                        
+                        <a href="{{ route('products.show', $product->id) }}" class="card-image-wrapper">
+                            @if($product->image)
+                                <img src="{{ asset('storage/' . $product->image) }}" class="card-img-top" alt="{{ $product->name }}">
+                            @else
+                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #bdbdbd; background-color: #fcfcfc;">
+                                    <i class="bi bi-box-fill" style="font-size: 3.5rem;"></i>
                                 </div>
+                            @endif
+                        </a>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="{{ route('products.show', $product->id) }}">
+                                    {{ $product->name }}
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted mb-4" style="font-size: 0.9rem;">{{ Str::limit($product->description, 60) }}</p>
+                            
+                            <div class="mt-auto d-flex flex-column align-items-start"> 
+                                <span class="product-price">R$ {{ number_format($product->price, 2, ',', '.') }}</span>
+                                
+                                {{-- MUDANÇA: Botão para Ver Detalhes --}}
+                                <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-view-details">
+                                    <i class="bi bi-eye-fill"></i> Ver Detalhes
+                                </a>
+                                {{-- FIM DA MUDANÇA --}}
                             </div>
                         </div>
                     </div>
-                @endforeach
-            </div>
-        @else
-            {{-- Mensagem caso não haja produtos --}}
-            <div class="col-12">
-                <p class="text-center text-muted">Nenhum produto em destaque no momento.</p>
-            </div>
-        @endif
+                </div>
+            @empty
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-archive" style="font-size: 2rem; color: #aeb6bf;"></i>
+                    <p class="text-muted mt-3">Nenhum produto em destaque no momento.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
-</div>
+</section>
+
+---
+
+<footer class="app-footer">
+    <div class="container">
+        <p>&copy; 2025 ShopHub. Todos os direitos reservados. | Design Elegante.</p>
+    </div>
+</footer>
+
+{{-- O script addToCart não é mais necessário, mas se você o usar em outro lugar, pode mantê-lo no layout. --}}
+
 @endsection

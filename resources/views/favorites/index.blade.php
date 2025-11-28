@@ -1,95 +1,252 @@
 @extends('layouts.app')
 
 @section('content')
-
-{{-- CSS dos cards (copiado de products.index) --}}
 <style>
-    .card-img-top.fixed-img { height: 220px; object-fit: cover; width: 100%; }
-    .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
-    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; }
-    .text-truncate-lines { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; min-height: 40px; }
-    .card-title-link { text-decoration: none; color: inherit; }
-    .card-title-link:hover { color: var(--bs-primary); }
+    /* Variáveis de Estilo da Página Inicial (Padronização) */
+    :root {
+        --primary-color: #5d5d81; /* Índigo Suave */
+        --accent-color: #00897b; /* Verde-Água (Teal) para Ação */
+        --dark-bg: #1f2833;
+        --light-bg: #f4f7f9; /* Fundo Muito Claro */
+        --card-shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra mais visível no hover */
+    }
+
+    /* Estilo do Container da Página */
+    .product-catalog-bg {
+        background: var(--light-bg);
+        padding: 60px 20px 100px;
+    }
+
+    /* Estilo do Cabeçalho da Página */
+    .catalog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 50px;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 15px;
+    }
+
+    .catalog-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+        font-size: 2rem;
+    }
+    
+    .btn-new-product {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+
+    .btn-new-product:hover {
+        background-color: #00695c;
+        border-color: #00695c;
+    }
+
+    /* Estilo dos Cards de Produto (Padronizado com a Index) */
+    .product-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: none;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .card-image-wrapper {
+        height: 280px;
+        overflow: hidden;
+        background: #fcfcfc;
+        position: relative;
+    }
+    
+    .card-image-wrapper img {
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    .product-card:hover .card-image-wrapper img {
+        transform: scale(1.05);
+    }
+
+    /* Preço, Título e Descrição */
+    .card-body .card-title {
+        color: #333;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+    /* Link do Título para Detalhes */
+    .card-body .card-title a {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.2s;
+    }
+    .card-body .card-title a:hover {
+        color: var(--accent-color);
+    }
+
+    .product-price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .product-details {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-top: 10px;
+    }
+
+    /* Card Footer - Botões de Ação */
+    .product-card-footer {
+        background: white;
+        border-top: 1px solid #eee;
+        display: flex;
+        gap: 8px;
+        padding: 10px 15px;
+        align-items: center;
+    }
+    
+    /* NOVO ESTILO: Botão Ver Detalhes */
+    .btn-view-details {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        font-weight: 600; /* Mais destaque para o CTA */
+        color: white;
+        transition: background-color 0.3s;
+        flex-grow: 1;
+        padding: 8px 10px; /* Padronizando padding */
+    }
+    
+    .btn-view-details:hover {
+        background-color: #00695c;
+        border-color: #00695c;
+    }
+    /* FIM NOVO ESTILO */
+
+    /* Botão Favoritos */
+    .btn-favorite {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #eee;
+        transition: color 0.3s, background 0.3s;
+    }
+    
+    .btn-favorite:hover {
+        background: white;
+        color: #e74c3c !important;
+    }
+    
+    .favorite-icon-filled {
+        color: #e74c3c !important;
+    }
+
+    /* Botão Admin */
+    .btn-edit-admin {
+        background-color: #f39c12;
+        border-color: #f39c12;
+        color: white;
+    }
 </style>
 
-<div class="container py-4" style="max-width: 1200px;">
-
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="product-catalog-bg">
+    <div class="container">
+        <div class="catalog-header">
+            <h1 class="catalog-title"><i class="bi bi-shop-window me-2"></i> Catálogo de Produtos</h1>
+            @if(auth()->user()?->is_admin)
+                <a href="{{ route('products.create') }}" class="btn btn-new-product">
+                    <i class="bi bi-plus-circle"></i> Novo Produto
+                </a>
+            @endif
         </div>
-    @endif
 
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-        <h1>Meus Favoritos</h1>
-    </div>
+        <div class="row g-4">
+            @forelse($products as $product)
+                @php
+                    // Recalcula o estado do favorito para cada card
+                    $isFavorite = auth()->check() && auth()->user()->favorites()->where('product_id', $product->id)->exists();
+                @endphp
+                
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card h-100 product-card">
+                        
+                        {{-- IMAGEM/LINK PARA DETALHES --}}
+                        <a href="{{ route('products.show', $product->id) }}" class="card-image-wrapper">
+                            @if($product->image)
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                            @else
+                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999;">
+                                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                </div>
+                            @endif
+                            
+                            {{-- BOTÃO DE FAVORITO (Sempre por cima) --}}
+                            @auth
+                                <form action="{{ route('favorites.toggle', $product->id) }}" method="POST" style="position: absolute; top: 10px; right: 10px;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-favorite">
+                                        <i class="bi {{ $isFavorite ? 'bi-heart-fill favorite-icon-filled' : 'bi-heart' }}" style="font-size: 1.1rem;"></i>
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-sm btn-favorite" style="position: absolute; top: 10px; right: 10px;">
+                                    <i class="bi bi-heart" style="font-size: 1.1rem;"></i>
+                                </a>
+                            @endauth
+                        </a>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @forelse($products as $product)
-            <div class="col">
-                <div class="card h-100 border-0 shadow-sm card-hover position-relative">
-
-                    {{-- Botão de Favorito (agora é um formulário) --}}
-                    {{-- Todos aqui estarão favoritados, então mostramos o botão preenchido --}}
-                    <form action="{{ route('favorites.toggle', $product->id) }}" method="POST" class="position-absolute top-0 end-0 m-2" style="z-index: 10;">
-                        @csrf
-                        <button type="submit" class="btn btn-danger btn-sm like-btn"> 
-                            <i class="bi bi-heart-fill"></i>
-                        </button>
-                    </form>
-
-                    <a href="{{ route('products.show', $product->id) }}">
-                        @if($product->image)
-                            <img src="{{ asset('storage/' . $product->image) }}" class="card-img-top fixed-img" alt="{{ $product->name }}">
-                        @else
-                            <img src="https://via.placeholder.com/300x200?text=Sem+Imagem" class="card-img-top fixed-img" alt="Sem imagem">
-                        @endif
-                    </a>
-
-                    <div class="card-body d-flex flex-column pb-0">
-                        <h5 class="card-title">
-                            <a href="{{ route('products.show', $product->id) }}" class="card-title-link">
-                                {{ $product->name }}
-                            </a>
-                        </h5>
-
-                        <p class="card-text text-muted small text-truncate-lines">
-                            {{ $product->description }}
-                        </p>
-
-                        <div class="mt-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="h5 mb-0 fw-bold text-success">
-                                    R$ {{ number_format($product->price, 2, ',', '.') }}
-                                </span>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{{ route('products.show', $product->id) }}">
+                                    {{ $product->name }}
+                                </a>
+                            </h5>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">{{ Str::limit($product->description, 80) }}</p>
+                            
+                            <div class="product-details">
+                                <span class="product-price">R$ {{ number_format($product->price, 2, ',', '.') }}</span>
+                                <span style="color: #ffc107; font-size: 0.9rem;">
+                                    <i class="bi bi-star-fill"></i> 4.5 (120) </span>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card-footer d-flex justify-content-center bg-transparent border-top-0 pt-0">
-                        {{-- Link para ver o produto --}}
-                         <a href="{{ route('products.show', $product->id) }}" class="btn btn-outline-primary btn-sm">
-                            Ver Detalhes
-                         </a>
+                        <div class="product-card-footer">
+                            
+                            {{-- MUDANÇA: BOTÃO VER DETALHES --}}
+                            <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-view-details w-100">
+                                <i class="bi bi-eye-fill"></i> Ver Detalhes
+                            </a>
+                            {{-- FIM MUDANÇA --}}
+
+                            @if(auth()->user()?->is_admin)
+                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-edit-admin" title="Editar Produto">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            @endif
+                            
+                        </div>
                     </div>
                 </div>
-            </div>
-        @empty
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <h4 class="alert-heading">Sua lista de favoritos está vazia.</h4>
-                    <p>Clique no coração <i class="bi bi-heart"></i> nos produtos para adicioná-los aqui.</p>
-                    <hr>
-                    <a href="{{ route('products.index') }}" class="btn btn-primary">Ver todos os produtos</a>
+            @empty
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-box-seam" style="font-size: 2.5rem; color: #aeb6bf;"></i>
+                    <p class="text-muted mt-3">Nenhum produto encontrado no catálogo.</p>
+                    @if(auth()->user()?->is_admin)
+                        <a href="{{ route('products.create') }}" class="btn btn-new-product mt-3">
+                            <i class="bi bi-plus-circle"></i> Criar Primeiro Produto
+                        </a>
+                    @endif
                 </div>
-            </div>
-        @endforelse
+            @endforelse
+        </div>
     </div>
-
-    <div class="d-flex justify-content-center mt-4">
-        {{ $products->links() }}
-    </div>
-
 </div>
 @endsection
