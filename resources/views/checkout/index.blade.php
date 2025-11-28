@@ -5,13 +5,14 @@
 <script src="https://js.stripe.com/v3/"></script>
 
 <style>
-    /* Variáveis de Estilo Padronizadas */
+    /* Variáveis de Estilo Padronizadas (Laranja/Vermelho) */
     :root {
-        --primary-color: #5d5d81; /* Índigo Suave */
-        --accent-color: #00897b; /* Verde-Água (Teal) para Ação */
-        --light-bg: #f4f7f9;
-        --border-color: #e0e0e0;
-        --price-color: #2c3e50; /* Cor escura para preços */
+        --primary-color: #333; /* Cor escura para texto principal/títulos */
+        --accent-color: #ff6347; /* Laranja/Tomate para Ação (como no botão) */
+        --accent-dark: #e84c3c; /* Vermelho/Laranja Escuro para Hover */
+        --light-bg: #f8f8f8; /* Fundo mais claro */
+        --border-color: #ddd;
+        --price-color: #2c3e50;
     }
     
     /* Container principal para centralizar e dar fundo */
@@ -28,7 +29,7 @@
         padding: 30px;
         background: white;
         border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra mais suave */
     }
 
     /* Título */
@@ -38,95 +39,116 @@
         margin-bottom: 25px;
         border-bottom: 2px solid var(--border-color);
         padding-bottom: 10px;
+        text-align: center; /* Centraliza o título */
     }
 
     /* Destaque do Valor */
     .payment-amount {
         font-size: 1.5rem;
-        font-weight: 700;
+        font-weight: 600;
         color: var(--price-color);
         margin-bottom: 20px;
+        text-align: center;
     }
     
     .payment-amount strong {
-        color: var(--accent-color);
+        color: var(--accent-dark); /* Destaque em tom mais forte */
+        font-size: 1.8rem;
     }
     
     /* Estilo do Elemento Stripe (Input) */
     #card-element {
         padding: 12px;
-        border: 1px solid var(--border-color); /* Borda cinza suave */
+        border: 1px solid var(--border-color);
         border-radius: 6px;
         margin-bottom: 20px;
         background-color: #fff;
-        transition: border-color 0.3s;
+        transition: border-color 0.3s, box-shadow 0.3s;
     }
     
     #card-element:focus-within {
-        border-color: var(--primary-color); /* Foco na cor primária */
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.2); /* Sombra suave no foco */
     }
 
-    /* Estilo do Botão "Pagar" (Substitui o azul padrão) */
+    /* Estilo do Botão "Pagar" - PADRÃO LARANJA */
     .btn-pay {
-        background: var(--accent-color); /* Verde-Água */
+        background: var(--accent-color);
+        background: linear-gradient(180deg, var(--accent-color) 0%, var(--accent-dark) 100%); /* Gradiente */
         color: #fff;
         border: none;
-        padding: 12px;
+        padding: 14px 12px;
         width: 100%;
         font-size: 1.1rem;
-        font-weight: 600;
-        border-radius: 6px;
+        font-weight: 700; /* Mais negrito */
+        border-radius: 8px; /* Bordas mais marcadas */
         cursor: pointer;
-        transition: background-color 0.3s, transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 0 var(--accent-dark); /* Efeito 3D sutil */
+        line-height: 1;
     }
     
     .btn-pay:hover {
-        background-color: #00695c; /* Tom mais escuro no hover */
-        transform: translateY(-1px);
+        transform: translateY(1px); /* Move levemente para baixo no hover */
+        box-shadow: 0 3px 0 var(--accent-dark); /* Reduz a sombra */
+    }
+    
+    .btn-pay:active {
+        transform: translateY(4px); /* Pressiona o botão */
+        box-shadow: 0 0 0 var(--accent-dark);
     }
     
     /* Mensagens de Status */
     #message {
         margin-top: 20px;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
         text-align: center;
     }
 
     #message span {
-        padding: 8px 15px;
-        border-radius: 4px;
+        padding: 10px 18px;
+        border-radius: 6px;
         display: inline-block;
     }
 
+    /* Mensagem de Erro */
     #message span[style*="color:red"] {
-        background-color: #fce7e7;
+        background-color: #fff0f0;
         color: #c0392b !important;
         border: 1px solid #c0392b;
     }
     
+    /* Mensagem de Sucesso */
     #message span[style*="color:green"] {
-        background-color: #e6fff7;
-        color: #00897b !important;
-        border: 1px solid #00897b;
+        background-color: #f0fff0;
+        color: #007000 !important;
+        border: 1px solid #007000;
+    }
+
+    /* Mensagem de Processamento (Amarelo/Laranja) */
+    #message span[style*="color:blue"] {
+        background-color: #fffbe6;
+        color: #f39c12 !important;
+        border: 1px solid #f39c12;
     }
 </style>
 
 <div class="checkout-wrapper">
     <div class="payment-card">
-        <h2><i class="bi bi-lock-fill me-2"></i> Pagamento Seguro</h2>
+        <h2>🔒 Pagamento Seguro</h2> 
         
-        <p class="payment-amount">Valor: <strong>R$ {{ isset($total) ? number_format($total, 2, ',', '.') : '0,00' }}</strong></p>
+        <p class="payment-amount">Total a Pagar: <strong>R$ {{ isset($total) ? number_format($total, 2, ',', '.') : '0,00' }}</strong></p>
 
         <form id="payment-form">
             <div class="mb-3">
-                <label class="form-label" style="font-weight: 500;">Dados do Cartão:</label>
+                <label class="form-label" style="font-weight: 600; color: var(--primary-color);">Preencha os dados do seu cartão:</label>
                 <div id="card-element">
-                    </div>
+                </div>
             </div>
 
             <button type="submit" class="btn-pay">
-                Pagar <i class="bi bi-wallet2 ms-1"></i>
+                Pagar Agora <i class="bi bi-arrow-right-circle-fill ms-1"></i>
             </button>
         </form>
 
@@ -135,7 +157,7 @@
 </div>
 
 <script>
-    // Configurações do Stripe e lógica de pagamento
+    // Configurações do Stripe e lógica de pagamento (permanece a mesma)
     const stripe = Stripe(@json(config('services.stripe.key')));
 
     const elements = stripe.elements();
@@ -149,7 +171,7 @@
         
         // Exibe mensagem de processamento enquanto espera
         document.getElementById("message").innerHTML = 
-            "<span style='color:blue; background-color: #e3f2fd; border: 1px solid #2196f3;'>Processando pagamento...</span>";
+            "<span style='color:blue; background-color: #fffbe6; border: 1px solid #f39c12;'>Processando pagamento...</span>";
 
         // 👉 1. Solicita ao backend a criação do PaymentIntent
         const response = await fetch("/createintent");

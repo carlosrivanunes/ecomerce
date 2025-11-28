@@ -57,8 +57,8 @@ class User extends Authenticatable
     /**
      * Retorna os produtos favoritos do usuário.
      */
-    public function favorites(): BelongsToMany
+    public function favorites()
     {
-        return $this->belongsToMany(Product::class, 'product_user');
+        return $this->belongsToMany(\App\Models\Product::class, 'product_user', 'user_id', 'product_id');
     }
 }

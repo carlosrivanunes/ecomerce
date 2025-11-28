@@ -2,12 +2,14 @@
 
 @section('content')
 <style>
-    /* Variáveis de Estilo Padronizadas */
+    /* Variáveis de Estilo Padronizadas (Laranja/Vermelho) */
     :root {
-        --primary-color: #5d5d81; /* Índigo Suave */
-        --accent-color: #00897b; /* Verde-Água (Teal) para Ação */
-        --light-bg: #f4f7f9;
-        --border-color: #e0e0e0;
+        --primary-color: #333; /* Cor escura para texto principal/títulos */
+        --secondary-color: #555;
+        --accent-color: #ff6347; /* Laranja para Ação */
+        --accent-dark: #e84c3c; /* Vermelho/Laranja Escuro para Hover */
+        --light-bg: #f8f8f8;
+        --border-color: #ddd;
         --price-color: #2c3e50;
     }
 
@@ -29,12 +31,12 @@
         font-size: 2rem;
     }
 
-    /* Estilo do Card Vazio */
+    /* Estilo do Card Vazio (Mantido) */
     .card-empty {
         border-radius: 8px;
     }
     .card-empty .bi-journal-x {
-        color: var(--primary-color) !important;
+        color: var(--secondary-color) !important;
         opacity: 0.6;
     }
     .card-empty h3 {
@@ -42,52 +44,90 @@
         font-weight: 600;
     }
 
-    /* Estilo da Tabela */
-    .table-orders thead th {
-        background-color: var(--primary-color);
-        color: white;
-        font-weight: 600;
-        border-bottom: none;
-        letter-spacing: 0.5px;
+    /* Estilo do Card de Pedido (Novo) */
+    .order-card {
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .order-card:hover {
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
     }
     
-    .table-orders tbody tr:hover {
-        background-color: #f9f9f9;
+    /* Cabeçalho do Card */
+    .order-card-header {
+        background-color: #fcfcfc;
+        border-bottom: 1px solid var(--border-color);
+        padding: 15px 20px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-
-    .table-orders tbody td {
-        color: #333;
-    }
-    
-    .table-orders tbody .fw-medium {
+    .order-id {
+        font-weight: 700;
         color: var(--primary-color);
+        font-size: 1.15rem;
+    }
+    .order-date {
+        color: var(--secondary-color);
+        font-size: 0.9rem;
+    }
+    
+    /* Corpo do Card */
+    .order-card-body {
+        padding: 20px;
+    }
+    .order-total-label {
+        font-weight: 600;
+        color: var(--secondary-color);
+    }
+    .order-total-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: green; /* Mantendo verde para valores positivos */
     }
 
-    /* Botão Primário (Usado na mensagem de Vazio) */
+    /* Badges de Status - Cores mantidas */
+    .badge {
+        font-weight: 600;
+        padding: 0.4em 0.8em;
+    }
+
+    /* Botão Primário (Estilo Laranja/Vermelho para "Ir para Produtos") */
     .btn-primary {
         background-color: var(--accent-color);
-        border-color: var(--accent-color);
-        font-weight: 500;
+        border-color: var(--accent-dark);
+        background: linear-gradient(180deg, var(--accent-color) 0%, var(--accent-dark) 100%);
+        box-shadow: 0 3px 0 var(--accent-dark);
+        font-weight: 700;
+        padding: 10px 20px;
+        border-radius: 6px;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
     .btn-primary:hover {
-        background-color: #00695c;
-        border-color: #00695c;
+        background-color: var(--accent-dark);
+        border-color: var(--accent-dark);
+        transform: translateY(1px);
+        box-shadow: 0 2px 0 var(--accent-dark);
+    }
+    .btn-primary:active {
+        transform: translateY(3px);
+        box-shadow: none;
     }
 
     /* Botão de Detalhes (Outline na cor de destaque) */
     .btn-outline-primary {
-        color: var(--accent-color);
+        color: var(--accent-dark);
         border-color: var(--accent-color);
+        font-weight: 600;
     }
     .btn-outline-primary:hover {
         background-color: var(--accent-color);
         color: white;
-    }
-
-    /* Badge de Status - Para garantir que as cores sejam vibrantes */
-    .badge {
-        font-weight: 600;
-        padding: 0.4em 0.8em;
     }
     
 </style>
@@ -97,7 +137,7 @@
 
     {{-- Verifica se há pedidos --}}
     @if ($orders->isEmpty())
-        {{-- Mensagem de "Nenhum Pedido" melhorada --}}
+        {{-- Mensagem de "Nenhum Pedido" --}}
         <div class="card border-0 shadow-sm text-center py-5 card-empty">
             <div class="card-body">
                 <i class="bi bi-journal-x" style="font-size: 4rem;"></i>
@@ -109,55 +149,59 @@
             </div>
         </div>
     @else
-        {{-- Lista de Pedidos --}}
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 table-orders">
-                        <thead>
-                            <tr>
-                                <th class="py-3 px-4">ID do Pedido</th>
-                                <th class="py-3 px-4">Data</th>
-                                <th class="py-3 px-4 text-end">Total</th>
-                                <th class="py-3 px-4 text-center">Status</th>
-                                <th class="py-3 px-4 text-end">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($orders as $order)
-                                <tr>
-                                    <td class="py-3 px-4 fw-medium">#{{ $order->id }}</td>
-                                    <td class="py-3 px-4">{{ $order->created_at->format('d/m/Y H:i') }}</td>
-                                    <td class="py-3 px-4 text-end fw-bold text-success">R$ {{ number_format($order->total, 2, ',', '.') }}</td>
-                                    <td class="py-3 px-4 text-center">
-                                        {{-- Usar Badges para o Status --}}
-                                        @php
-                                            $statusClass = 'bg-secondary';
-                                            if (strtolower($order->status) == 'pago' || strtolower($order->status) == 'concluído' || strtolower($order->status) == 'entregue') {
-                                                $statusClass = 'bg-success';
-                                            } elseif (strtolower($order->status) == 'pendente' || strtolower($order->status) == 'processando') {
-                                                $statusClass = 'bg-warning text-dark';
-                                            } elseif (strtolower($order->status) == 'cancelado') {
-                                                $statusClass = 'bg-danger';
-                                            }
-                                        @endphp
-                                        <span class="badge rounded-pill {{ $statusClass }}">{{ ucfirst($order->status) }}</span>
-                                    </td>
-                                    <td class="py-3 px-4 text-end">
-                                        {{-- Botão para Ver Detalhes --}}
-                                        <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
-                                            <i class="bi bi-eye-fill"></i> Detalhes
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+        {{-- Novo Grid de Cards para a Lista de Pedidos --}}
+        <div class="row">
+            @foreach ($orders as $order)
+                <div class="col-lg-6 col-xl-4"> {{-- Colunas responsivas (2 ou 3 pedidos por linha) --}}
+                    <div class="card shadow-sm order-card bg-white">
+                        
+                        <div class="order-card-header">
+                            <span class="order-id">Pedido #{{ $order->id }}</span>
+                            <span class="order-date">{{ $order->created_at->format('d/m/Y') }}</span>
+                        </div>
+
+                        <div class="order-card-body">
+                            
+                            {{-- Status do Pedido (Em destaque) --}}
+                            <div class="mb-3">
+                                <span class="order-total-label me-2">Status:</span>
+                                @php
+                                    $statusClass = 'bg-secondary';
+                                    if (strtolower($order->status) == 'pago' || strtolower($order->status) == 'concluído' || strtolower($order->status) == 'entregue') {
+                                        $statusClass = 'bg-success';
+                                    } elseif (strtolower($order->status) == 'pendente' || strtolower($order->status) == 'processando') {
+                                        $statusClass = 'bg-warning text-dark';
+                                    } elseif (strtolower($order->status) == 'cancelado') {
+                                        $statusClass = 'bg-danger';
+                                    }
+                                @endphp
+                                <span class="badge rounded-pill {{ $statusClass }}">{{ ucfirst($order->status) }}</span>
+                            </div>
+
+                            {{-- Total do Pedido --}}
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <p class="order-total-label mb-0">Total:</p>
+                                    <p class="order-total-amount mb-0">R$ {{ number_format($order->total, 2, ',', '.') }}</p>
+                                </div>
+                                
+                                {{-- Botão de Detalhes --}}
+                                <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-primary" title="Ver Detalhes">
+                                    Ver Detalhes <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+
+                            <p class="text-muted mb-0" style="font-size: 0.85rem;">
+                                Última atualização: {{ $order->updated_at->format('d/m/Y H:i') }}
+                            </p>
+
+                        </div>
+                    </div>
                 </div>
-            </div>
+            @endforeach
         </div>
 
-        {{-- Adicionar Paginação (opcional, dependendo da implementação do controller) --}}
+        {{-- Adicionar Paginação --}}
         @if (method_exists($orders, 'links'))
         <div class="d-flex justify-content-center mt-4">
             {{ $orders->links() }}

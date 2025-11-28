@@ -119,17 +119,16 @@ class ProductController extends Controller
      * *** MÉTODO DESTROY ADICIONADO ***
      * Remove (exclui) um produto do banco de dados e a sua imagem.
      */
-    public function destroy(Product $product) // Usando Route Model Binding
+    public function destroy(Product $product)
     {
-        // 1. Remove a imagem do storage se ela existir
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
+        // Deletar imagem se existir
+        if ($product->image) {
+            \Storage::disk('public')->delete($product->image);
         }
-
-        // 2. Deleta o registo do produto do banco de dados
+        
+        // Deletar produto
         $product->delete();
-
-        // 3. Redireciona de volta para a lista com mensagem de sucesso
-        return redirect()->route('products.index')->with('success', 'Produto removido com sucesso!');
+        
+        return redirect()->route('products.index')->with('success', 'Produto excluído com sucesso!');
     }
 }

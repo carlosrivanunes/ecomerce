@@ -13,15 +13,11 @@ class FavoriteController extends Controller
      */
     public function index()
     {
-        // Pega os produtos favoritos do usuário logado
-        $products = Auth::user()->favorites()->latest()->paginate(9);
+        $user = auth()->user();
+        // retorna collection de Product (não existe relação 'image' no model)
+        $favorites = $user->favorites()->get();
 
-        // Carrega os favoritos do usuário para o estado do botão
-        // (Nesta página, todos estarão favoritados)
-        $userFavorites = $products->keyBy('id');
-
-        // Retorna a view, passando os produtos
-        return view('favorites.index', compact('products', 'userFavorites'));
+        return view('favorites.index', compact('favorites'));
     }
 
     /**

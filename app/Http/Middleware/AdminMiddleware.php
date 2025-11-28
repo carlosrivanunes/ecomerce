@@ -11,17 +11,13 @@ class AdminMiddleware
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Verifica se o usuário está logado E se é administrador
         if (Auth::check() && Auth::user()->is_admin) {
             return $next($request);
         }
 
-        // Se não for admin, retorna erro 403 (Proibido)
-        abort(403, 'Acesso não autorizado. Apenas administradores podem realizar esta ação.');
+        return redirect('/')->with('error', 'Acesso negado');
     }
 }

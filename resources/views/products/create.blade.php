@@ -2,174 +2,200 @@
 
 @section('content')
 <style>
-    /* Variáveis de Estilo Padronizadas */
+    /* Variáveis de Estilo Padronizadas (Laranja/Vermelho) */
     :root {
-        --primary-color: #5d5d81; /* Índigo Suave */
-        --accent-color: #00897b; /* Verde-Água (Teal) para Ação */
-        --light-bg: #f4f7f9;
-        --border-color: #e0e0e0;
-        --success-custom: #27ae60; /* Verde Customizado para sucesso/validade */
+        --primary-text: #34495e; /* Azul Escuro Sóbrio para Textos */
+        --accent-color: #ff6633; /* Laranja Vívido para Ação Principal */
+        --light-bg: #f4f7f9; /* Fundo principal da página */
+        --form-bg: white; /* Fundo do Card do Formulário */
+        --border-color: #dee2e6;
     }
 
-    /* Container Principal */
-    .container {
-        padding-top: 50px;
-        padding-bottom: 50px;
+    /* Container Principal da Página */
+    .form-container-bg {
         background-color: var(--light-bg);
-        min-height: 80vh;
+        padding: 50px 20px 80px;
+        min-height: 90vh;
     }
 
-    /* Card Principal do Formulário */
+    /* Card Principal do Formulário (Visual Minimalista) */
     .form-card {
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
+        background-color: var(--form-bg);
+        border-radius: 10px;
+        border: none; 
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
     }
     
-    /* Cabeçalho do Card */
-    .form-card .card-header {
-        background-color: var(--primary-color) !important;
-        color: white;
-        border-bottom: 1px solid var(--border-color);
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-    }
-
-    .form-card .card-header h1 {
-        font-weight: 600;
-        color: white; /* Cor do título no cabeçalho */
+    /* Título (Fora do Header, mais simples) */
+    .form-title {
+        color: var(--primary-text);
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 30px;
     }
 
     /* Estilo de Inputs e Labels */
     .form-label {
-        color: var(--primary-color);
+        color: var(--primary-text);
         font-weight: 600 !important;
+        margin-bottom: 5px;
     }
     
     .input-group-text {
-        background-color: #f7f7f7;
-        color: var(--primary-color);
+        background-color: transparent; /* Transparente para visual clean */
+        color: var(--primary-text);
+        border-right: none;
         border-color: var(--border-color);
     }
     
-    /* Estilo do Botão de Ação (Cadastrar) */
+    .form-control {
+        border-left: none;
+        border-color: var(--border-color);
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.15rem rgba(255, 102, 51, 0.2); /* Sombra Laranja/Vermelha sutil */
+    }
+    
+    .input-group:focus-within .input-group-text {
+        color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+
+    /* Botão Principal de Ação (Laranja/Vermelho) */
     .btn-main-action {
         background-color: var(--accent-color);
         border-color: var(--accent-color);
         color: white;
         font-weight: 600;
+        padding: 10px 25px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         transition: background-color 0.3s;
     }
     .btn-main-action:hover {
-        background-color: #00695c;
-        border-color: #00695c;
+        background-color: #e65220;
+        border-color: #e65220;
     }
     
-    /* Estilo do Botão Secundário (Cancelar) */
-    .btn-outline-secondary {
-        color: var(--primary-color);
-        border-color: var(--primary-color);
+    /* Botão Secundário (Cancelar/Voltar) */
+    .btn-secondary-action {
+        color: var(--primary-text);
+        border: 1px solid var(--border-color);
+        background-color: transparent;
         font-weight: 500;
+        padding: 10px 25px;
+        border-radius: 5px;
+        transition: all 0.3s;
     }
-    .btn-outline-secondary:hover {
-        background-color: var(--primary-color);
-        color: white;
+    .btn-secondary-action:hover {
+        background-color: #e9ecef;
     }
 
-    /* Alerta de erro */
+    /* Estilo de Alerta de Erro mais discreto */
     .alert-danger {
-        border-color: #f5c6cb;
+        background-color: #fff3f3;
+        color: #c0392b;
+        border-left: 4px solid #c0392b;
+        border-radius: 4px;
+        padding: 10px 15px;
     }
     
 </style>
 
-<div class="container mt-5" style="max-width: 700px;">
-
-    <div class="card shadow-lg border-0 form-card">
+<div class="form-container-bg">
+    <div class="container" style="max-width: 750px;">
         
-        <div class="card-header py-3">
-            <h1 class="h4 mb-0 text-center"><i class="bi bi-plus-circle me-2"></i> Cadastrar Novo Produto</h1>
-        </div>
+        <h1 class="text-center form-title">
+            <i class="bi bi-box-fill me-2" style="color: var(--accent-color);"></i> Cadastro de Novo Produto
+        </h1>
 
-        <div class="card-body p-4 p-md-5">
+        <div class="card form-card">
+            <div class="card-body p-4 p-md-5">
 
-            {{-- Mensagem de erro --}}
-            @if ($errors->any())
-                <div class="alert alert-danger" role="alert">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                @csrf
-
-                {{-- Nome do Produto --}}
-                <div class="mb-3">
-                    <label for="name" class="form-label fw-semibold">Nome do Produto</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
-                        <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
-                        @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                {{-- Mensagem de erro (Estilo discreto) --}}
+                @if ($errors->any())
+                    <div class="alert alert-danger mb-4" role="alert">
+                        <h4 class="alert-heading h6"><i class="bi bi-exclamation-triangle-fill me-2"></i> Por favor, corrija os erros abaixo:</h4>
+                        <ul class="mb-0 small">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
-                </div>
+                @endif
 
-                {{-- Descrição --}}
-                <div class="mb-3">
-                    <label for="description" class="form-label fw-semibold">Descrição</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                        <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror" rows="4" required>{{ old('description') }}</textarea>
+                <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    @csrf
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            {{-- Nome do Produto --}}
+                            <label for="name" class="form-label">Nome do Produto</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-tag-fill"></i></span>
+                                <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Monitor 4K..." required>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            {{-- Preço --}}
+                            <label for="price" class="form-label">Preço (R$)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                                <input type="number" name="price" id="price" step="0.01" min="0" class="form-control @error('price') is-invalid @enderror" value="{{ old('price') }}" placeholder="0.00" required>
+                                @error('price')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Descrição --}}
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Descrição Detalhada</label>
+                        <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror" rows="5" placeholder="Descrição completa do produto e suas características." required>{{ old('description') }}</textarea>
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
 
-                {{-- Preço --}}
-                <div class="mb-3">
-                    <label for="price" class="form-label fw-semibold">Preço</label>
-                    <div class="input-group">
-                        <span class="input-group-text">R$</span>
-                        <input type="number" name="price" id="price" step="0.01" min="0" class="form-control @error('price') is-invalid @enderror" value="{{ old('price') }}" required>
-                        @error('price')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                    {{-- Imagem --}}
+                    <div class="mb-5">
+                        <label for="image" class="form-label">Imagem do Produto</label>
+                        <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                        <small class="form-text text-muted">Recomendado: Imagem de alta resolução em formato quadrado.</small>
+                        @error('image')
+                            <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
 
-                {{-- Imagem --}}
-                <div class="mb-4">
-                    <label for="image" class="form-label fw-semibold">Imagem</label>
-                    <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
-                    @error('image')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="d-flex justify-content-between pt-3">
-                    {{-- Botão Cancelar (Outline com Primary Color) --}}
-                    <a href="{{ route('products.index') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-lg me-1"></i>
-                        Cancelar
-                    </a>
-                    {{-- Botão Cadastrar (Cor de Destaque/Accent Color) --}}
-                    <button type="submit" class="btn btn-main-action">
-                        <i class="bi bi-check-lg me-1"></i>
-                        Cadastrar Produto
-                    </button>
-                </div>
-            </form>
+                    <div class="d-flex justify-content-between pt-4">
+                        {{-- Botão Voltar/Cancelar --}}
+                        <a href="{{ route('products.index') }}" class="btn btn-secondary-action">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Voltar
+                        </a>
+                        {{-- Botão Cadastrar (Cor de Destaque/Accent Color) --}}
+                        <button type="submit" class="btn btn-main-action">
+                            <i class="bi bi-plus-lg me-1"></i>
+                            Cadastrar Produto
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Script de validação do Bootstrap 5
+    // Script de validação do Bootstrap 5 (Mantido)
     (function () {
     'use strict'
 
